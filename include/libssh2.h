@@ -519,6 +519,8 @@ LIBSSH2_API void libssh2_exit(void);
  */
 LIBSSH2_API void libssh2_free(LIBSSH2_SESSION *session, void *ptr);
 
+LIBSSH2_API void *libssh2_alloc(LIBSSH2_SESSION *session, size_t size);
+
 /*
  * libssh2_session_supported_algs()
  *

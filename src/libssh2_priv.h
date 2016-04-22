@@ -192,10 +192,19 @@ static inline int writev(int sock, struct iovec *iov, int nvecs)
 #define LIBSSH2_RECV_FD(session, fd, buffer, length, flags) \
     (session->recv)(fd, buffer, length, flags, &session->abstract)
 
+static inline ssize_t _libssh_update_stats(long long *pCounter, ssize_t value)
+{
+	if (value > 0)
+		*pCounter += value;
+	return value;
+}
+
 #define LIBSSH2_SEND(session, buffer, length, flags)  \
-    LIBSSH2_SEND_FD(session, session->socket_fd, buffer, length, flags)
+    _libssh_update_stats(&(session)->total_bytes_sent, LIBSSH2_SEND_FD(session, session->socket_fd, buffer, length, flags))
 #define LIBSSH2_RECV(session, buffer, length, flags)                    \
-    LIBSSH2_RECV_FD(session, session->socket_fd, buffer, length, flags)
+    _libssh_update_stats(&(session)->total_bytes_received, LIBSSH2_RECV_FD(session, session->socket_fd, buffer, length, flags))
+	
+
 
 typedef struct _LIBSSH2_KEX_METHOD LIBSSH2_KEX_METHOD;
 typedef struct _LIBSSH2_HOSTKEY_METHOD LIBSSH2_HOSTKEY_METHOD;
@@ -821,6 +830,9 @@ struct _LIBSSH2_SESSION
     int keepalive_interval;
     int keepalive_want_reply;
     time_t keepalive_last_sent;
+	
+	long long total_bytes_sent;
+	long long total_bytes_received;	
 };
 
 /* session.state bits */

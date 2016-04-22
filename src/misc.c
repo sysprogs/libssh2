@@ -203,6 +203,27 @@ _libssh2_ntohu64(const unsigned char *buf)
     return ((libssh2_uint64_t)msl <<32) | lsl;
 }
 
+ssize_t _libssh2_send_blocking(libssh2_socket_t sock, const void *buffer, size_t length,
+	int flags, void **abstract)
+{
+	for (;;)
+	{
+		fd_set fd;
+		struct timeval timeout;
+		ssize_t rc = _libssh2_send(sock, buffer, length, flags, abstract);
+		if (rc != -EAGAIN)
+			return rc;
+
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+
+		FD_ZERO(&fd);
+		FD_SET(sock, &fd);
+		select(sock + 1, NULL, &fd, NULL, &timeout);
+	}
+}
+
+
 /* _libssh2_htonu32
  */
 void
@@ -401,6 +422,12 @@ LIBSSH2_API void
 libssh2_free(LIBSSH2_SESSION *session, void *ptr)
 {
     LIBSSH2_FREE(session, ptr);
+}
+
+LIBSSH2_API void*
+libssh2_alloc(LIBSSH2_SESSION *session, size_t size)
+{
+	return LIBSSH2_ALLOC(session, size);
 }
 
 #ifdef LIBSSH2DEBUG

@@ -502,6 +502,13 @@ libssh2_session_init_ex(LIBSSH2_ALLOC_FUNC((*my_alloc)),
     return session;
 }
 
+ssize_t	_libssh2_send_blocking(libssh2_socket_t sock, const void *buffer, size_t length, int flags, void **abstract);
+
+LIBSSH2_API void libssh2_session_enable_blocking_send(LIBSSH2_SESSION * session)
+{
+	libssh2_session_callback_set(session, LIBSSH2_CALLBACK_SEND, _libssh2_send_blocking);
+}
+
 /*
  * libssh2_session_callback_set
  *
@@ -1788,4 +1795,16 @@ libssh2_session_banner_get(LIBSSH2_SESSION *session)
         return NULL;
 
     return (const char *) session->remote.banner;
+}
+
+
+LIBSSH2_API void
+	libssh2_session_stats_get(LIBSSH2_SESSION *session, long long *pBytesReceived, long long *pBytesSent)
+{
+	if (!session)
+		return;
+	if (pBytesReceived)
+		*pBytesReceived = session->total_bytes_received;
+	if (pBytesSent)
+		*pBytesSent = session->total_bytes_sent;
 }
