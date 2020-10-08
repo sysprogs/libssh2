@@ -1,7 +1,7 @@
 # $Id: Makefile.am,v 1.21 2009/05/07 17:21:56 bagder Exp $
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-# Get the CRYPTO_CSOURCES and CRYPTO_HHEADERS defines
+# Get the CRYPTO_CSOURCES, CRYPTO_HHEADERS and CRYPTO_LTLIBS defines
 if OPENSSL
 include ../Makefile.OpenSSL.inc
 endif
@@ -11,8 +11,8 @@ endif
 if WINCNG
 include ../Makefile.WinCNG.inc
 endif
-if OS400QC3
-include ../Makefile.os400qc3.inc
+if MBEDTLS
+include ../Makefile.mbedTLS.inc
 endif
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
@@ -62,4 +62,4 @@ VERSION=-version-info 1:1:0
 
 libssh2_la_LDFLAGS = $(VERSION) -no-undefined \
 	-export-symbols-regex '^libssh2_.*' \
-	$(LTLIBGCRYPT) $(LTLIBSSL) $(LTLIBZ)
+	$(CRYPTO_LTLIBS) $(LTLIBZ)
